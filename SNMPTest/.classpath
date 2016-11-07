@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="D:/SNMP4J.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/java-mail-1.4.4.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/mail.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/jaf-1.0.2/activation.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/commons-email-1.4-bin/commons-email-1.4/commons-email-1.4.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/httpclient-4.3.6.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/org-apache-commons-logging.jar/org-apache-commons-logging.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/httpcore-4.4.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/gson-2.3.1.jar"/>
+	<classpathentry kind="lib" path="jgoodies-forms-1.8.0.jar" sourcepath="jgoodies-forms-1.8.0-sources.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/icmp4j.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/icmp4j-all.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/icmp4j-android.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/jna-3.5.1.jar"/>
+	<classpathentry kind="lib" path="D:/Project/통합관제/platform-3.5.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
