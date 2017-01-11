@@ -54,7 +54,7 @@ public class TestMibPaser {
 		
 		TestMibPaser parser = new TestMibPaser();
 		output = new DwSnmpMibOutputHandler();
-		String fName="C:\\Users\\sung053\\Desktop\\jmibbrowser\\mibs\\test3.my";
+		String fName="D:\\study\\EP_MIB\\AV-VOICE-PORTAL-MIB.txt";
 		if(parser.loadNewFile(fName)){
 			parser.loadFile(fName);
 		}else{
@@ -75,6 +75,7 @@ public class TestMibPaser {
 		System.out.println("parseFile");
 		DwSnmpMibTreeBuilder builder = new DwSnmpMibTreeBuilder();
 		SnmpMibParser fParser = new SnmpMibParser(fName,builder);
+
 		if (this.output != null)
 			fParser.setOutput(this.output);
 		return fParser.parseMibFile();

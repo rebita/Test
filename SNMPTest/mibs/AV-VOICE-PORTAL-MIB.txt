@@ -1,0 +1,4050 @@
+-- Copyright 2005-2008 by Avaya Inc. All rights reserved.
+
+AV-VOICE-PORTAL-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	enterprises,
+	MODULE-IDENTITY,
+	OBJECT-TYPE,
+	NOTIFICATION-TYPE
+		FROM SNMPv2-SMI
+	ituAlarmPerceivedSeverity
+		FROM ITU-ALARM-MIB
+	OBJECT-GROUP,
+	NOTIFICATION-GROUP,
+	MODULE-COMPLIANCE
+		FROM SNMPv2-CONF;
+
+avpVoicePortal MODULE-IDENTITY
+	LAST-UPDATED "200808120955Z"
+	ORGANIZATION "Avaya, Inc."
+	CONTACT-INFO
+		"Avaya Customer Services
+
+		Postal: Avaya, Inc.
+		             211 Mount Airy Rd
+		             Basking Ridge. NJ 07920
+		             USA
+		             Tel: +1 908 953 6000
+		             WWW: http://www.avaya.com"
+	DESCRIPTION
+		"A MIB to support Avaya Voice Portal."
+	REVISION "200507281822Z"
+	DESCRIPTION
+		"Revision 1.0.0 - Bill McCarty
+		Original version."
+	REVISION "200511141233Z"
+	DESCRIPTION
+		"Revision 1.0.1 - Bill McCarty
+		Added new trap definitions.
+		Added Voice Portal status branch"
+	REVISION "200701051734Z"
+	DESCRIPTION
+		"Revision 1.0.2 - Bill McCarty
+		Corrected several trap definitions.
+		  - avpUnknown (993),
+          - avpTRAPQLICE00001 (1), 
+          - avpTRAPQLICE00002 (2), 
+          - avpTRAPQLICE00004 (4)"
+	REVISION "200702261105Z"
+	DESCRIPTION
+		"Revision 1.0.3 - Bill McCarty
+		Added generic trap definitions.
+		  - avpTRAPGENINFO (900),
+          - avpTRAPGENMINOR  (901), 
+          - avpTRAPGENMAJOR  (902), 
+          - avpTRAPGENCRITICAL (903)
+		Added OID to provide access to retrieve VPMS Software Version
+		  - OID: 1.3.6.1.4.1.6889.2.17.3.2.4
+		Updated copyright notice to include 2007."
+	REVISION "200707121748Z"
+	DESCRIPTION
+		"Revision 1.0.4 - Bill McCarty
+		Added OID branch to provide access to Application Called URI entries in App Table.
+		  - OID: 1.3.6.1.4.1.6889.2.17.3.3.1.3.x"
+	REVISION "200711051649Z"
+	DESCRIPTION
+		"Revision 1.0.5 - Bill McCarty
+		Added OID branch to provide access to VPMS name (as defined in Voice Portal configuration)
+		  - OID: 1.3.6.1.4.1.6889.2.17.3.2.5"
+	REVISION "200808120955Z"
+	DESCRIPTION
+		"Revision 1.0.6 - Bill McCarty
+		In the definition of avpApplicationObjectGroup, corrected avpEntryCalledURI 
+		to be avpEntryAppCalledURI"
+	REVISION "201004120955Z"
+	DESCRIPTION
+		"Revision 1.0.7 - Rahul Buddhisagar
+		Added support for Application URL1, Associated URL and Associated URL1 entries in
+		the Application Table."
+	REVISION "201004121031Z"
+	DESCRIPTION
+		"Revision 1.0.8 - Rahul Buddhisagar
+		Added new branch for providing information on Auxiliary VPMS Table.
+		 - OID Branch : .1.3.6.1.4.1.6889.2.17.3.4"
+	::= { avpVoicePortalMibs 4 }
+
+
+avaya OBJECT IDENTIFIER 	::= { enterprises 6889 }
+
+products OBJECT IDENTIFIER 	::= { avaya 1 }
+
+mibs OBJECT IDENTIFIER 	::= { avaya 2 }
+
+avpVoicePortalProd OBJECT IDENTIFIER 	::= { products 17 }
+
+avpVoicePortalMibs OBJECT IDENTIFIER 	::= { mibs 17 }
+
+--
+-- Top level components of this MIB
+--
+
+avpNotification OBJECT IDENTIFIER 	::= { avpVoicePortalMibs 1 }
+
+avpObjects OBJECT IDENTIFIER 	::= { avpVoicePortalMibs 2 }
+
+avpTraps OBJECT IDENTIFIER 	::= { avpNotification 0 }
+
+--
+-- Objects defined and used by Voice Portal MIB
+--
+
+avpAlarmTime OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Date and Time that the alarm occurred"
+	::= { avpObjects 1 }
+
+
+avpAlarmLoc OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Location (system name/IP) where alarm occurred"
+	::= { avpObjects 2 }
+
+
+avpAlarmSev OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Sevrity of Alarm"
+	::= { avpObjects 3 }
+
+
+avpAlarmText OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Text description associated with this alarm"
+	::= { avpObjects 4 }
+
+
+avpVoicePortalExtendedMIB OBJECT IDENTIFIER 	::= { avpVoicePortalMibs 3 }
+
+avpMPPTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF AvpMPPEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		""
+	::= { avpVoicePortalExtendedMIB 1 }
+
+
+avpMPPEntry OBJECT-TYPE
+	SYNTAX  AvpMPPEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Provides basic status and some configuration information for a single MPP."
+	INDEX {
+ 		IMPLIED avpMPPEntryName }
+	::= { avpMPPTable 1 }
+
+
+AvpMPPEntry ::= SEQUENCE {
+
+	avpMPPEntryName                   OCTET STRING,
+	avpMPPEntryIPAddress              OCTET STRING,
+	avpMPPEntryVersion                OCTET STRING,
+	avpMPPEntryRequestedState         OCTET STRING,
+	avpMPPEntryConfiguredState        OCTET STRING,
+	avpMPPEntryCurrentState           OCTET STRING,
+	avpMPPEntryCPUUsagePercent        OCTET STRING,
+	avpMPPEntryDiskUsagePercent       OCTET STRING,
+	avpMPPEntryMemoryUsagePercent     OCTET STRING,
+	avpMPPEntryCPUUsage24HrAverage    OCTET STRING,
+	avpMPPEntryDiskUsage24HrAverage   OCTET STRING,
+	avpMPPEntryMemoryUsage24HrAverage OCTET STRING,
+	avpMPPEntryUnacknowledgedAlarms   OCTET STRING,
+	avpMPPEntryAcknowledgedAlarms     OCTET STRING,
+	avpMPPEntryActiveCalls            OCTET STRING,
+	avpMPPEntryCallsToday             OCTET STRING }
+
+
+avpMPPEntryName OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"MPP Name"
+	::= { avpMPPEntry 0 }
+
+
+avpMPPEntryIPAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"IP Address of MPP"
+	::= { avpMPPEntry 1 }
+
+
+avpMPPEntryVersion OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Version of software running on MPP"
+	::= { avpMPPEntry 2 }
+
+
+avpMPPEntryRequestedState OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The state that the MPP was requested to be in."
+	::= { avpMPPEntry 3 }
+
+
+avpMPPEntryConfiguredState OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The state that the MPP is configured to be in."
+	::= { avpMPPEntry 4 }
+
+
+avpMPPEntryCurrentState OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The state that the MPP is currently in."
+	::= { avpMPPEntry 5 }
+
+
+avpMPPEntryCPUUsagePercent OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"CPU Usage of the MPP (in percent) "
+	::= { avpMPPEntry 6 }
+
+
+avpMPPEntryDiskUsagePercent OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The disk usage of the MPP (in percent) "
+	::= { avpMPPEntry 7 }
+
+
+avpMPPEntryMemoryUsagePercent OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The memory usage of the MPP (in percent) "
+	::= { avpMPPEntry 8 }
+
+
+avpMPPEntryCPUUsage24HrAverage OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The CPU usage of the MPP (in percent) averaged over the last 24 hours"
+	::= { avpMPPEntry 9 }
+
+
+avpMPPEntryDiskUsage24HrAverage OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The disk usage of the MPP (in percent) averaged over the last 24 hours"
+	::= { avpMPPEntry 10 }
+
+
+avpMPPEntryMemoryUsage24HrAverage OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The memory usage of the MPP (in percent) averaged over the last 24 hours"
+	::= { avpMPPEntry 11 }
+
+
+avpMPPEntryUnacknowledgedAlarms OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The number of unacknowledged alarms for the MPP"
+	::= { avpMPPEntry 12 }
+
+
+avpMPPEntryAcknowledgedAlarms OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The number of acknowledged alarms for the MPP"
+	::= { avpMPPEntry 13 }
+
+
+avpMPPEntryActiveCalls OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The number of active calls for the MPP"
+	::= { avpMPPEntry 14 }
+
+
+avpMPPEntryCallsToday OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The number of calls today for the MPP"
+	::= { avpMPPEntry 15 }
+
+
+avpVPMSProperties OBJECT IDENTIFIER 	::= { avpVoicePortalExtendedMIB 2 }
+
+avpVPMSHostname OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The hostname of the VPMS system"
+	::= { avpVPMSProperties 0 }
+
+
+avpVPMSConfiguredMPPCount OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The number of MPP's configured on this VPMS"
+	::= { avpVPMSProperties 1 }
+
+
+avpVPMSUnacknowledgedAlarms OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The number of unacknowledged alarms for the VPMS"
+	::= { avpVPMSProperties 2 }
+
+
+avpVPMSAcknowledgedAlarms OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The number of acknowledged alarms for the VPMS"
+	::= { avpVPMSProperties 3 }
+
+
+avpVPMSSWVersion OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The software version of the VPMS"
+	::= { avpVPMSProperties 4 }
+
+
+avpVPMSName OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The name assigned to the VPMS in the Voice Portal configuration."
+	::= { avpVPMSProperties 5 }
+
+
+avpTableApplications OBJECT-TYPE
+	SYNTAX  SEQUENCE OF AvpEntryApplication
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"A Tablle of applications configured for this Voice Portal system."
+	::= { avpVoicePortalExtendedMIB 3 }
+
+
+avpEntryApplication OBJECT-TYPE
+	SYNTAX  AvpEntryApplication
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		""
+	INDEX {
+		avpEntryAppName }
+	::= { avpTableApplications 1 }
+
+
+AvpEntryApplication ::= SEQUENCE {
+
+	avpEntryAppName OCTET STRING,
+	avpEntryAppDNIS OCTET STRING,
+	avpEntryAppURL  OCTET STRING,
+	avpEntryAppCalledURI  OCTET STRING,
+	avpEntryAppURL1 OCTET STRING,
+	avpEntryAppAssociateURL OCTET STRING,
+	avpEntryAppAssociateURL1 OCTET STRING
+	}
+
+
+avpEntryAppName OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The name of the application"
+	::= { avpEntryApplication 0 }
+
+
+avpEntryAppDNIS OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The DNIS or Called Numbers for this application"
+	::= { avpEntryApplication 1 }
+
+
+avpEntryAppURL OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The URL for this application"
+	::= { avpEntryApplication 2 }
+
+avpEntryAppCalledURI OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The Called URI Numbers for this application"
+	::= { avpEntryApplication 3 }
+	
+avpEntryAppURL1 OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The URL1 for this application"
+	::= { avpEntryApplication 4 }
+
+avpEntryAppAssociateURL OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The AssociateURL for this application"
+	::= { avpEntryApplication 5 }
+	
+avpEntryAppAssociateURL1 OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The AssociateURL1 for this application"
+	::= { avpEntryApplication 6 }
+
+avpTableAuxVPMS OBJECT-TYPE
+	SYNTAX SEQUENCE OF AvpAuxVPMS
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Display information for each auxiliary VPMS that is configured for this Voice Portal system."
+	::= { avpVoicePortalExtendedMIB 4}
+
+avpAuxVPMS OBJECT-TYPE
+	SYNTAX AvpAuxVPMS
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		""
+	INDEX { 
+		avpAuxVPMSName }
+	::= { avpTableAuxVPMS 1 }
+
+
+AvpAuxVPMS ::= SEQUENCE {
+	avpAuxVPMSName OCTET STRING,
+	avpAuxVPMSHostAddress OCTET STRING,
+	avpAuxVPMSSWVersion OCTET STRING
+	}
+
+
+avpAuxVPMSName OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The name assigned to the auxiliary vpms in the Voice Portal Configuration."
+	::= { avpAuxVPMS 0 }
+	
+avpAuxVPMSHostAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The hostname or IP Address of the auxiliary vpms"
+	::= { avpAuxVPMS 1 }
+
+
+avpAuxVPMSSWVersion OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The software version of the auxiliary VPMS"
+	::= { avpAuxVPMS 2 }
+
+
+--
+-- Notification Types
+--
+
+avpUnknown NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"An unknown alarm condition"
+	::= { avpTraps 993 }
+
+
+avpTRAPQLICE00001 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to contact WebLM server"
+	REFERENCE
+
+		"QLICE00001"
+	::= { avpTraps 1 }
+
+
+avpTRAPQLICE00002 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"License grace period has exceeded"
+	REFERENCE
+
+		"QLICE00002"
+	::= { avpTraps 2 }
+
+
+avpTRAPQLICE00003 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"License has expired"
+	REFERENCE
+
+		"QLICE00003"
+	::= { avpTraps 3 }
+
+
+avpTRAPQLICE00004 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"License information is not available in the database"
+	REFERENCE
+
+		"QLICE00004"
+	::= { avpTraps 4 }
+
+
+avpTRAPQLICE00005 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"An SQL exception has occurred."
+	REFERENCE
+
+		"QLICE00005"
+	::= { avpTraps 5 }
+
+
+avpTRAPQCXI00001 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"IPC connection to SessionManager failed"
+	REFERENCE
+
+		"QCXI_00001"
+	::= { avpTraps 6 }
+
+
+avpTRAPQCXI00002 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Invalid parameter sent to a function"
+	REFERENCE
+
+		"QCXI_00002"
+	::= { avpTraps 7 }
+
+
+avpTRAPQCXI00003 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"No IPC connection, function failed"
+	REFERENCE
+
+		"QCXI_00003"
+	::= { avpTraps 8 }
+
+
+avpTRAPQCXI00004 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Caught unknown exception in function"
+	REFERENCE
+
+		"QCXI_00004"
+	::= { avpTraps 9 }
+
+
+avpTRAPQCXI00005 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Out of memory"
+	REFERENCE
+
+		"QCXI_00005"
+	::= { avpTraps 10 }
+
+
+avpTRAPQCXI00006 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Error from CXI engine!"
+	REFERENCE
+
+		"QCXI_00006"
+	::= { avpTraps 11 }
+
+
+avpTRAPQCXI00007 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Error connecting to IPC channel"
+	REFERENCE
+
+		"QCXI_00007"
+	::= { avpTraps 12 }
+
+
+avpTRAPQCXI00008 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Error sending Ready message to SessionManager"
+	REFERENCE
+
+		"QCXI_00008"
+	::= { avpTraps 13 }
+
+
+avpTRAPQCXI00009 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Empty log slot"
+	REFERENCE
+
+		"QCXI_00009"
+	::= { avpTraps 14 }
+
+
+avpTRAPQCXI00010 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Non-existant session"
+	REFERENCE
+
+		"QCXI_00010"
+	::= { avpTraps 15 }
+
+
+avpTRAPQCXI00011 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed to route event to a session"
+	REFERENCE
+
+		"QCXI_00011"
+	::= { avpTraps 16 }
+
+
+avpTRAPQCXI00012 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Received invalid message in function"
+	REFERENCE
+
+		"QCXI_00012"
+	::= { avpTraps 17 }
+
+
+avpTRAPQCXI00013 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"IPC connection failed.  Max number of attempts reached"
+	REFERENCE
+
+		"QCXI_00013"
+	::= { avpTraps 18 }
+
+
+avpTRAPQCXI00016 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"CCXML page error in event with invalid argument"
+	REFERENCE
+
+		"QCXI_00016"
+	::= { avpTraps 19 }
+
+
+avpTRAPQCXI00017 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Handle already exists"
+	REFERENCE
+
+		"QCX_00017"
+	::= { avpTraps 20 }
+
+
+avpTRAPQADMN10001 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Maintenance caught unknown exception"
+	REFERENCE
+
+		"QADMN10001"
+	::= { avpTraps 21 }
+
+
+avpTRAPQADMN10002 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Maintenance purge failed because directory does not exist"
+	REFERENCE
+
+		"QADMN10002"
+	::= { avpTraps 22 }
+
+
+avpTRAPQADMN10003 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Maintenance purge failed cannot convert Retention Days value to integer"
+	REFERENCE
+
+		"QADMN10003"
+	::= { avpTraps 23 }
+
+
+avpTRAPQADMN10004 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Maintenance purge failed due to bad Retention Days value"
+	REFERENCE
+
+		"QADMN10004"
+	::= { avpTraps 24 }
+
+
+avpTRAPQADMN10005 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Maintenance purge failed cannot convert year/month/day value to integer"
+	REFERENCE
+
+		"QADMN10005"
+	::= { avpTraps 25 }
+
+
+avpTRAPQSYSM00001 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP System Manager initialization of mgt library failed"
+	REFERENCE
+
+		"QSYSM00001"
+	::= { avpTraps 26 }
+
+
+avpTRAPQSYSM00002 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP System Manager initialization failed with error"
+	REFERENCE
+
+		"QSYSM00002"
+	::= { avpTraps 27 }
+
+
+avpTRAPQSYSM00003 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP System Manager cannot access config file"
+	REFERENCE
+
+		"QSYSM00003"
+	::= { avpTraps 28 }
+
+
+avpTRAPQSYSM00004 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Cannot create message object"
+	REFERENCE
+
+		"QSYSM00004"
+	::= { avpTraps 29 }
+
+
+avpTRAPQSYSM00005 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Cannot register message callbacks"
+	REFERENCE
+
+		"QSYSM00005"
+	::= { avpTraps 30 }
+
+
+avpTRAPQSYSM00006 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Cannot accept message connection"
+	REFERENCE
+
+		"QSYSM00006"
+	::= { avpTraps 31 }
+
+
+avpTRAPQSYSM00007 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Cannot publish MPP configuration data"
+	REFERENCE
+
+		"QSYSM00007"
+	::= { avpTraps 32 }
+
+
+avpTRAPQSYSM00008 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP startup aborted because process failed to start"
+	REFERENCE
+
+		"QSYSM00008"
+	::= { avpTraps 33 }
+
+
+avpTRAPQSYSM00009 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"During MPP startup because process failed to start"
+	REFERENCE
+
+		"QSYSM00009"
+	::= { avpTraps 34 }
+
+
+avpTRAPQSYSM00010 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed to execute system"
+	REFERENCE
+
+		"QSYSM00010"
+	::= { avpTraps 35 }
+
+
+avpTRAPQSYSM00011 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unknown command was issued from the MMS"
+	REFERENCE
+
+		"QSYSM00011"
+	::= { avpTraps 36 }
+
+
+avpTRAPQSYSM00013 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Command issued from the MMS was ignored because the MPP requires further configuration"
+	REFERENCE
+
+		"QSYSM00013"
+	::= { avpTraps 37 }
+
+
+avpTRAPQSYSM00014 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed to send a message"
+	REFERENCE
+
+		"QSYSM00014"
+	::= { avpTraps 38 }
+
+
+avpTRAPQSYSM00015 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed to issue command to process"
+	REFERENCE
+
+		"QSYSM00015"
+	::= { avpTraps 39 }
+
+
+avpTRAPQSYSM00016 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed to respond to MMS heartbeat request"
+	REFERENCE
+
+		"QSYSM00016"
+	::= { avpTraps 40 }
+
+
+avpTRAPQSYSM00017 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed to create process"
+	REFERENCE
+
+		"QSYSM00017"
+	::= { avpTraps 41 }
+
+
+avpTRAPQSYSM00018 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed to send signal to process"
+	REFERENCE
+
+		"QSYSM00018"
+	::= { avpTraps 42 }
+
+
+avpTRAPQSYSM00019 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unexpected exception occurred"
+	REFERENCE
+
+		"QSYSM00019"
+	::= { avpTraps 43 }
+
+
+avpTRAPQSYSM00020 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Process stopped sending keep-alive messages is being terminated"
+	REFERENCE
+
+		"QSYSM00020"
+	::= { avpTraps 44 }
+
+
+avpTRAPQSYSM00022 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Process stopped unexpectedly. Restart count of exhausted"
+	REFERENCE
+
+		"QSYSM00022"
+	::= { avpTraps 45 }
+
+
+avpTRAPQSYSM00023 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Process initialization failed"
+	REFERENCE
+
+		"QSYSM00023"
+	::= { avpTraps 46 }
+
+
+avpTRAPQSYSM00024 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Memory allocation failure"
+	REFERENCE
+
+		"QSYSM00024"
+	::= { avpTraps 47 }
+
+
+avpTRAPQSYSM00025 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP configuration failure because configuration data is empty"
+	REFERENCE
+
+		"QSYSM00025"
+	::= { avpTraps 48 }
+
+
+avpTRAPQSYSM00026 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Cpu use has exceeded configured threshold"
+	REFERENCE
+
+		"QSYSM00026"
+	::= { avpTraps 49 }
+
+
+avpTRAPQSYSM00027 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Memory use has exceeded configured threshold"
+	REFERENCE
+
+		"QSYSM00027"
+	::= { avpTraps 50 }
+
+
+avpTRAPQSYSM00028 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Disk use has exceeded configured threshold"
+	REFERENCE
+
+		"QSYSM00028"
+	::= { avpTraps 51 }
+
+
+avpTRAPQSYSM00029 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"The MPP process cannot be stopped in its current state"
+	REFERENCE
+
+		"QSYSM00029"
+	::= { avpTraps 52 }
+
+
+avpTRAPQVB00001 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"An unknown exception occurred"
+	REFERENCE
+
+		"QVB__00001"
+	::= { avpTraps 53 }
+
+
+avpTRAPQVB00002 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Could not establish a connection with SessionManager"
+	REFERENCE
+
+		"QVB__00002"
+	::= { avpTraps 54 }
+
+
+avpTRAPQVB00003 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Browser execution terminated abnormally"
+	REFERENCE
+
+		"QVB__00003"
+	::= { avpTraps 55 }
+
+
+avpTRAPQVB00004 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Encountered exception creating new browser instance"
+	REFERENCE
+
+		"QVB__00004"
+	::= { avpTraps 56 }
+
+
+avpTRAPQVB00005 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Encountered exception creating voice browser factory"
+	REFERENCE
+
+		"QVB__00005"
+	::= { avpTraps 57 }
+
+
+avpTRAPQSESM00001 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Network error occured on CCXML message channel"
+	REFERENCE
+
+		"QSESM00001"
+	::= { avpTraps 58 }
+
+
+avpTRAPQSESM00002 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Network error occured on VXML message channel"
+	REFERENCE
+
+		"QSESM00002"
+	::= { avpTraps 59 }
+
+
+avpTRAPQSESM00003 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Connect to CCXML process message channel failed"
+	REFERENCE
+
+		"QSESM00003"
+	::= { avpTraps 60 }
+
+
+avpTRAPQSESM00004 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Connect to VXML process message channel failed"
+	REFERENCE
+
+		"QSESM00004"
+	::= { avpTraps 61 }
+
+
+avpTRAPQSESM00005 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to get CCXML message channel"
+	REFERENCE
+
+		"QSESM00005"
+	::= { avpTraps 62 }
+
+
+avpTRAPQSESM00006 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to register CCXML message channel"
+	REFERENCE
+
+		"QSESM00006"
+	::= { avpTraps 63 }
+
+
+avpTRAPQSESM00007 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to get VXML message channel"
+	REFERENCE
+
+		"QSESM00007"
+	::= { avpTraps 64 }
+
+
+avpTRAPQSESM00008 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to register VXML message channel"
+	REFERENCE
+
+		"QSESM00008"
+	::= { avpTraps 65 }
+
+
+avpTRAPQSESM00009 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to send message to CCXML channel"
+	REFERENCE
+
+		"QSESM00009"
+	::= { avpTraps 66 }
+
+
+avpTRAPQSESM00010 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to send message to VXML channel"
+	REFERENCE
+
+		"QSESM00010"
+	::= { avpTraps 67 }
+
+
+avpTRAPQSESM00011 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"ASR connect to server failed to initialized"
+	REFERENCE
+
+		"QSESM00011"
+	::= { avpTraps 68 }
+
+
+avpTRAPQSESM00012 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"ASR provider error"
+	REFERENCE
+
+		"QSESM00012"
+	::= { avpTraps 69 }
+
+
+avpTRAPQSESM00013 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Timeout waiting for ASR to initialize"
+	REFERENCE
+
+		"QSESM00013"
+	::= { avpTraps 70 }
+
+
+avpTRAPQSESM00014 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"TTS connect to server failed to initialized"
+	REFERENCE
+
+		"QSESM00014"
+	::= { avpTraps 71 }
+
+
+avpTRAPQSESM00015 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Timeout waiting for TTS to initialize"
+	REFERENCE
+
+		"QSESM00015"
+	::= { avpTraps 72 }
+
+
+avpTRAPQSESM00016 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to create telephony play record endpoint"
+	REFERENCE
+
+		"QSESM00016"
+	::= { avpTraps 73 }
+
+
+avpTRAPQSESM00017 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to create telephony speech dialog object"
+	REFERENCE
+
+		"QSESM00017"
+	::= { avpTraps 74 }
+
+
+avpTRAPQSESM00018 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Could not start ASR session"
+	REFERENCE
+
+		"QSESM00018"
+	::= { avpTraps 75 }
+
+
+avpTRAPQSESM00019 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to create ASR port object"
+	REFERENCE
+
+		"QSESM00019"
+	::= { avpTraps 76 }
+
+
+avpTRAPQSESM00020 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Could not start TTS session"
+	REFERENCE
+
+		"QSESM00020"
+	::= { avpTraps 77 }
+
+
+avpTRAPQSESM00021 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to create TTS port object"
+	REFERENCE
+
+		"QSESM00021"
+	::= { avpTraps 78 }
+
+
+avpTRAPQSESM00022 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Caught Exception, session is exiting"
+	REFERENCE
+
+		"QSESM00022"
+	::= { avpTraps 79 }
+
+
+avpTRAPQSESM00023 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Caught Exception in main, exiting SessionManager"
+	REFERENCE
+
+		"QSESM00023"
+	::= { avpTraps 80 }
+
+
+avpTRAPQSESM00024 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Connection to (CCXML,VXML) process, failed"
+	REFERENCE
+
+		"QSESM00024"
+	::= { avpTraps 81 }
+
+
+avpTRAPQSESM00025 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Error has occured with connection to process, unable to process calls"
+	REFERENCE
+
+		"QSESM00025"
+	::= { avpTraps 82 }
+
+
+avpTRAPQSESM00026 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to reconnect to (CCXML,VXML) process, SessionManager is exiting"
+	REFERENCE
+
+		"QSESM00026"
+	::= { avpTraps 83 }
+
+
+avpTRAPQSESM00027 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to create path"
+	REFERENCE
+
+		"QSESM00027"
+	::= { avpTraps 84 }
+
+
+avpTRAPQSESM00028 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Error opening file"
+	REFERENCE
+
+		"QSESM00028"
+	::= { avpTraps 85 }
+
+
+avpTRAPQSESM00029 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Error writing to file"
+	REFERENCE
+
+		"QSESM00029"
+	::= { avpTraps 86 }
+
+
+avpTRAPQSESM00030 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"ASR provider failed to load"
+	REFERENCE
+
+		"QSESM00030"
+	::= { avpTraps 87 }
+
+
+avpTRAPQSESM00031 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"ASR provider 'CreateProvider' returned NULL"
+	REFERENCE
+
+		"QSESM00031"
+	::= { avpTraps 88 }
+
+
+avpTRAPQSESM00032 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Invalid ASR provider unable to find 'CreateProvider' symbol"
+	REFERENCE
+
+		"QSESM00032"
+	::= { avpTraps 89 }
+
+
+avpTRAPQSESM00033 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"ASR provider failed to initialize"
+	REFERENCE
+
+		"QSESM00033"
+	::= { avpTraps 90 }
+
+
+avpTRAPQSESM00034 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"TTS provider failed to load"
+	REFERENCE
+
+		"QSESM00034"
+	::= { avpTraps 91 }
+
+
+avpTRAPQSESM00035 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"TTS provider error, 'CreateProvider' returned NULL"
+	REFERENCE
+
+		"QSESM00035"
+	::= { avpTraps 92 }
+
+
+avpTRAPQSESM00036 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Invalid TTS provider, unable to find 'CreateProvider' symbol"
+	REFERENCE
+
+		"QSESM00036"
+	::= { avpTraps 93 }
+
+
+avpTRAPQSESM00037 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"TTS provider failed to initialize"
+	REFERENCE
+
+		"QSESM00037"
+	::= { avpTraps 94 }
+
+
+avpTRAPQSESM00038 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Telephony provider failed to load"
+	REFERENCE
+
+		"QSESM00038"
+	::= { avpTraps 95 }
+
+
+avpTRAPQSESM00039 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Telephony provider 'CreateProvider' returned NULL"
+	REFERENCE
+
+		"QSESM00039"
+	::= { avpTraps 96 }
+
+
+avpTRAPQSESM00040 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Invalid Telephony provider unable to find 'CreateProvider' symbol"
+	REFERENCE
+
+		"QSESM00040"
+	::= { avpTraps 97 }
+
+
+avpTRAPQSESM00041 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Telephony MakeCall to CalledURI failed"
+	REFERENCE
+
+		"QSESM00041"
+	::= { avpTraps 98 }
+
+
+avpTRAPQSESM00042 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Playfile with file failed on EndPoint"
+	REFERENCE
+
+		"QSESM00042"
+	::= { avpTraps 99 }
+
+
+avpTRAPQSESM00043 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Record with file failed on EndPoint"
+	REFERENCE
+
+		"QSESM00043"
+	::= { avpTraps 100 }
+
+
+avpTRAPQSESM00044 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"TTS operation failed"
+	REFERENCE
+
+		"QSESM00044"
+	::= { avpTraps 101 }
+
+
+avpTRAPQSESM00045 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"ASR SetParameter failed"
+	REFERENCE
+
+		"QSESM00045"
+	::= { avpTraps 102 }
+
+
+avpTRAPQSESM00046 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"LoadGrammar for grammar failed"
+	REFERENCE
+
+		"QSESM00046"
+	::= { avpTraps 103 }
+
+
+avpTRAPQSESM00047 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Activate Grammar failed"
+	REFERENCE
+
+		"QSESM00047"
+	::= { avpTraps 104 }
+
+
+avpTRAPQSESM00048 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Start Recognition failed"
+	REFERENCE
+
+		"QSESM00048"
+	::= { avpTraps 105 }
+
+
+avpTRAPQSESM00049 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Start DTMF Collection failed"
+	REFERENCE
+
+		"QSESM00049"
+	::= { avpTraps 106 }
+
+
+avpTRAPQSESM00051 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to initialize status shared memory segment"
+	REFERENCE
+
+		"QSESM00051"
+	::= { avpTraps 107 }
+
+
+avpTRAPQSESM00052 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to add station"
+	REFERENCE
+
+		"QSESM00052"
+	::= { avpTraps 108 }
+
+
+avpTRAPQSESM00053 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Remove station failed"
+	REFERENCE
+
+		"QSESM00053"
+	::= { avpTraps 109 }
+
+
+avpTRAPQSESM00054 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Trunks not supported at this time"
+	REFERENCE
+
+		"QSESM00054"
+	::= { avpTraps 110 }
+
+
+avpTRAPQSESM00056 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"CreateCall failed"
+	REFERENCE
+
+		"QSESM00056"
+	::= { avpTraps 111 }
+
+
+avpTRAPQSESM00057 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Invalid SessionHande"
+	REFERENCE
+
+		"QSESM00057"
+	::= { avpTraps 112 }
+
+
+avpTRAPQSESM00064 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"TTS provider error"
+	REFERENCE
+
+		"QSESM00064"
+	::= { avpTraps 113 }
+
+
+avpTRAPQSESM00065 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Caught Exception during initialization, SessionManager cannot start"
+	REFERENCE
+
+		"QSESM00065"
+	::= { avpTraps 114 }
+
+
+avpTRAPQSESM00066 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Telephony Subsystem Error: All Stations Out-Of-Service."
+	REFERENCE
+
+		"QSESM00066"
+	::= { avpTraps 195 }
+
+
+avpTRAPQTELE00001 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Configuration Error"
+	REFERENCE
+
+		"QTELE00001"
+	::= { avpTraps 115 }
+
+
+avpTRAPQTELE00002 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Network Error"
+	REFERENCE
+
+		"QTELE00002"
+	::= { avpTraps 116 }
+
+
+avpTRAPQTELE00003 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Remote Endpoint Error"
+	REFERENCE
+
+		"QTELE00003"
+	::= { avpTraps 117 }
+
+
+avpTRAPQTELE00004 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Media Error"
+	REFERENCE
+
+		"QTELE00004"
+	::= { avpTraps 118 }
+
+
+avpTRAPQTELE00005 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Signaling Error"
+	REFERENCE
+
+		"QTELE00005"
+	::= { avpTraps 119 }
+
+
+avpTRAPQTELE00006 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Call Error"
+	REFERENCE
+
+		"QTELE00006"
+	::= { avpTraps 120 }
+
+
+avpTRAPQTELE00007 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Call Force Cleared"
+	REFERENCE
+
+		"QTELE00007"
+	::= { avpTraps 121 }
+
+
+avpTRAPQTELE00008 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"All Channels Busy"
+	REFERENCE
+
+		"QTELE00008"
+	::= { avpTraps 122 }
+
+
+avpTRAPQTELE00009 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Exception Caught"
+	REFERENCE
+
+		"QTELE00009"
+	::= { avpTraps 196 }
+
+
+avpTRAPQTELE00024 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Call Handler Initialization Failed"
+	REFERENCE
+
+		"QTELE00024"
+	::= { avpTraps 197 }
+
+
+avpTRAPQTELE00031 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Channel Out of Service"
+	REFERENCE
+
+		"QTELE00031"
+	::= { avpTraps 200 }
+
+
+avpTRAPQMMS00001 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Cannot create message object"
+	REFERENCE
+
+		"QMMS_00001"
+	::= { avpTraps 123 }
+
+
+avpTRAPQMMS00002 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Connection failure"
+	REFERENCE
+
+		"QMMS_00002"
+	::= { avpTraps 124 }
+
+
+avpTRAPQMMS00003 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed to send command to MPP System Manager"
+	REFERENCE
+
+		"QMMS_00003"
+	::= { avpTraps 125 }
+
+
+avpTRAPQADMN01005 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Alarm threshold for failed logins exceeded"
+	REFERENCE
+
+		"QADMN01005"
+	::= { avpTraps 126 }
+
+
+avpTRAPQCDH00001 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unable to access configuration data (CDH)"
+	REFERENCE
+
+		"QCDH_00001"
+	::= { avpTraps 127 }
+
+
+avpTRAPQCDH00008 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Scheduled event completed with errors"
+	REFERENCE
+
+		"QCDH_00008"
+	::= { avpTraps 132 }
+
+
+avpTRAPQOMS00034 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Bad date format in from database table"
+	REFERENCE
+
+		"QOMS_00034"
+	::= { avpTraps 133 }
+
+
+avpTRAPQOMS00035 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP has port that has not been configured by VPMS"
+	REFERENCE
+
+		"QOMS_00035"
+	::= { avpTraps 134 }
+
+
+avpTRAPQOMS00036 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP has port that has not been assigned to it by VPMS"
+	REFERENCE
+
+		"QOMS_00036"
+	::= { avpTraps 135 }
+
+
+avpTRAPQOMS00037 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP has port that has been assigned to another MPP by VPMS"
+	REFERENCE
+
+		"QOMS_00037"
+	::= { avpTraps 136 }
+
+
+avpTRAPQOMS00039 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unknown state received from MPP"
+	REFERENCE
+
+		"QOMS_00039"
+	::= { avpTraps 137 }
+
+
+avpTRAPQOMS00040 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unknown Exception Occurred"
+	REFERENCE
+
+		"QOMS_00040"
+	::= { avpTraps 138 }
+
+
+avpTRAPQOMS00045 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Error opening realtime database causing OMS to terminate"
+	REFERENCE
+
+		"QOMS_00045"
+	::= { avpTraps 139 }
+
+
+avpTRAPQOMS00047 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unknown error opening realtime database causing OMS to terminate"
+	REFERENCE
+
+		"QOMS_00047"
+	::= { avpTraps 140 }
+
+
+avpTRAPQOMS00049 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"System Data Module(SDM) initialization error occured"
+	REFERENCE
+
+		"QOMS_00049"
+	::= { avpTraps 141 }
+
+
+avpTRAPQOMS00050 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed getting session for configuration database (SDM)"
+	REFERENCE
+
+		"QOMS_00050"
+	::= { avpTraps 142 }
+
+
+avpTRAPQOMS00051 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed getting instance of configuration database (SDM) Mananger"
+	REFERENCE
+
+		"QOMS_00051"
+	::= { avpTraps 143 }
+
+
+avpTRAPQOMS00052 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed getting configuration database (SDM) Voice Portal System"
+	REFERENCE
+
+		"QOMS_00052"
+	::= { avpTraps 144 }
+
+
+avpTRAPQOMS00053 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed getting configuration database (SDM) Voice Portal System"
+	REFERENCE
+
+		"QOMS_00053"
+	::= { avpTraps 145 }
+
+
+avpTRAPQOMS00054 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Configuration change dates container not defined"
+	REFERENCE
+
+		"QOMS_00054"
+	::= { avpTraps 146 }
+
+
+avpTRAPQOMS00055 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Configuration change dates resource not defined"
+	REFERENCE
+
+		"QOMS_00055"
+	::= { avpTraps 147 }
+
+
+avpTRAPQOMS00056 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Exception occured while retreiving configuration change dates"
+	REFERENCE
+
+		"QOMS_00056"
+	::= { avpTraps 148 }
+
+
+avpTRAPQOMS00057 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Exception occured while retreiving H.323 configuration"
+	REFERENCE
+
+		"QOMS_00057"
+	::= { avpTraps 149 }
+
+
+avpTRAPQOMS00058 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Global Settings container not defined"
+	REFERENCE
+
+		"QOMS_00058"
+	::= { avpTraps 150 }
+
+
+avpTRAPQOMS00059 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Global Settings resource not defined"
+	REFERENCE
+
+		"QOMS_00059"
+	::= { avpTraps 151 }
+
+
+avpTRAPQOMS00060 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Exception occured while retreiving global settings"
+	REFERENCE
+
+		"QOMS_00060"
+	::= { avpTraps 152 }
+
+
+avpTRAPQOMS00061 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Error retrieving VPMS logging host IP address"
+	REFERENCE
+
+		"QOMS_00061"
+	::= { avpTraps 153 }
+
+
+avpTRAPQOMS00062 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"TBD"
+	REFERENCE
+
+		"QOMS_00062"
+	::= { avpTraps 154 }
+
+
+avpTRAPQOMS00063 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"VoIP resources not found"
+	REFERENCE
+
+		"QOMS_00063"
+	::= { avpTraps 155 }
+
+
+avpTRAPQOMS00064 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Exception occured while retreiving Voice over IP configuration"
+	REFERENCE
+
+		"QOMS_00064"
+	::= { avpTraps 156 }
+
+
+avpTRAPQOMS00065 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Exception occured while retreiving TTS configuration"
+	REFERENCE
+
+		"QOMS_00065"
+	::= { avpTraps 157 }
+
+
+avpTRAPQOMS00066 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Exception occured while retreiving application configuration"
+	REFERENCE
+
+		"QOMS_00066"
+	::= { avpTraps 158 }
+
+
+avpTRAPQOMS00067 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Exception occured while retreiving ASR configuration"
+	REFERENCE
+
+		"QOMS_00067"
+	::= { avpTraps 159 }
+
+
+avpTRAPQOMS00068 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Exception occured while retreiving Media Processing Platform configuration"
+	REFERENCE
+
+		"QOMS_00068"
+	::= { avpTraps 160 }
+
+
+avpTRAPQOMS00077 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Configuration data exception occured"
+	REFERENCE
+
+		"QOMS_00077"
+	::= { avpTraps 161 }
+
+
+avpTRAPQOMS00078 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Realtime data exception occured"
+	REFERENCE
+
+		"QOMS_00078"
+	::= { avpTraps 162 }
+
+
+avpTRAPQOMS00079 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Manager exception occured"
+	REFERENCE
+
+		"QOMS_00079"
+	::= { avpTraps 163 }
+
+
+avpTRAPQOMS00080 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Error comitting performance data to database"
+	REFERENCE
+
+		"QOMS_00080"
+	::= { avpTraps 164 }
+
+
+avpTRAPQOMS00081 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Error deleting performance data from database"
+	REFERENCE
+
+		"QOMS_00081"
+	::= { avpTraps 165 }
+
+
+avpTRAPQOMS00082 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Configuration data exception occured while fetching data for OMS UI"
+	REFERENCE
+
+		"QOMS_00082"
+	::= { avpTraps 166 }
+
+
+avpTRAPQOMS00083 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Realtime data exception occured while fetching data for OMS UI"
+	REFERENCE
+
+		"QOMS_00083"
+	::= { avpTraps 167 }
+
+
+avpTRAPQOMS00084 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Manager exception occured while fetching data for OMS UI"
+	REFERENCE
+
+		"QOMS_00084"
+	::= { avpTraps 168 }
+
+
+avpTRAPQOMS00085 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Unknown exception occured while fetching data for OMS UI"
+	REFERENCE
+
+		"QOMS_00085"
+	::= { avpTraps 169 }
+
+
+avpTRAPQOMS00088 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP marked Not Responding because it failed to respond to multiple poll requests"
+	REFERENCE
+
+		"QOMS_00088"
+	::= { avpTraps 170 }
+
+
+avpTRAPQOMS00090 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Manager exception occured while processing MPP schedule"
+	REFERENCE
+
+		"QOMS_00090"
+	::= { avpTraps 171 }
+
+
+avpTRAPQOMS00095 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP unexpectedly entered the error state"
+	REFERENCE
+
+		"QOMS_00095"
+	::= { avpTraps 172 }
+
+
+avpTRAPQOMS00096 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP unexpectedly entered the degraded state"
+	REFERENCE
+
+		"QOMS_00096"
+	::= { avpTraps 173 }
+
+
+avpTRAPQOMS00097 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP unexpectedly is starting"
+	REFERENCE
+
+		"QOMS_00097"
+	::= { avpTraps 174 }
+
+
+avpTRAPQOMS00098 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP unexpectedly stopped"
+	REFERENCE
+
+		"QOMS_00098"
+	::= { avpTraps 175 }
+
+
+avpTRAPQOMS00099 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP unexpectedly is stopping"
+	REFERENCE
+
+		"QOMS_00099"
+	::= { avpTraps 176 }
+
+
+avpTRAPQOMS00100 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"SQL exception occured saving MPP"
+	REFERENCE
+
+		"QOMS_00100"
+	::= { avpTraps 177 }
+
+
+avpTRAPQOMS00122 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Configuring MPP failed with no result"
+	REFERENCE
+
+		"QOMS_00122"
+	::= { avpTraps 183 }
+
+
+avpTRAPQOMS00123 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Configuring MPP failed with error"
+	REFERENCE
+
+		"QOMS_00123"
+	::= { avpTraps 184 }
+
+
+avpTRAPQOMS00124 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Encrypt/Decrypt Invalid Key Exception occurred"
+	REFERENCE
+
+		"QOMS_00124"
+	::= { avpTraps 185 }
+
+
+avpTRAPQOMS00125 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Encrypt/Decrypt No Such Algorithm Exception occurred"
+	REFERENCE
+
+		"QOMS_00125"
+	::= { avpTraps 186 }
+
+
+avpTRAPQOMS00126 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Encrypt/Decrypt No Such Padding Exception occurred"
+	REFERENCE
+
+		"QOMS_00126"
+	::= { avpTraps 187 }
+
+
+avpTRAPQOMS00128 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Start/Restart failure; MPP failed to accept start command after it was stopped"
+	REFERENCE
+
+		"QOMS_00128"
+	::= { avpTraps 201 }
+
+
+avpTRAPQOMS00129 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Delete MPP failure: Stop request to MPP failed (MPP must be manually stopped to complete deletion)"
+	REFERENCE
+
+		"QOMS_00129"
+	::= { avpTraps 202 }
+
+
+avpTRAPQOMS00140 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Too many consecutive database errors occurred updating the real time database, OMS terminating"
+	REFERENCE
+
+		"QOMS_00140"
+	::= { avpTraps 194 }
+
+
+avpTRAPQOMS00160 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed to retrieve initial configuration change dates; OMS will terminate!"
+	REFERENCE
+
+		"QOMS_00160"
+	::= { avpTraps 203 }
+
+
+avpTRAPQASR00005 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed initializing ASR server"
+	REFERENCE
+
+		"QASR_00005"
+	::= { avpTraps 198 }
+
+
+avpTRAPQASR00007 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Caught exception"
+	REFERENCE
+
+		"QASR_00007"
+	::= { avpTraps 188 }
+
+
+avpTRAPQASR00008 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Caught an unknown exception"
+	REFERENCE
+
+		"QASR_00008"
+	::= { avpTraps 189 }
+
+
+avpTRAPQTTS00005 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Failed initializing TTS server"
+	REFERENCE
+
+		"QTTS_00005"
+	::= { avpTraps 199 }
+
+
+avpTRAPQTTS00007 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Caught exception"
+	REFERENCE
+
+		"QTTS_00007"
+	::= { avpTraps 193 }
+
+
+avpTRAPQTTS00008 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Caught an unknown exception"
+	REFERENCE
+
+		"QTTS_00008"
+	::= { avpTraps 190 }
+
+
+avpTRAPQMRCP00005 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Callback not registered"
+	REFERENCE
+
+		"QMRCP00005"
+	::= { avpTraps 191 }
+
+
+avpTRAPQMRCP00006 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"An unknown exception occurred"
+	REFERENCE
+
+		"QMRCP00006"
+	::= { avpTraps 192 }
+
+
+avpTRAPQCXI00015 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Attempt to use IPC after shutdown initiated"
+	REFERENCE
+
+		"QCXI_00015"
+	::= { avpTraps 178 }
+
+
+avpTRAPQSYSM00012 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Command issued from the MMS was ignored because the MPP was in the wrong running state"
+	REFERENCE
+
+		"QSYSM00012"
+	::= { avpTraps 179 }
+
+
+avpTRAPQSYSM00021 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP Process stopped unexpectedly. Restarting the process"
+	REFERENCE
+
+		"QSYSM00021"
+	::= { avpTraps 180 }
+
+
+avpTRAPQSESM00050 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"No application configured for call with DNIS"
+	REFERENCE
+
+		"QSESM00050"
+	::= { avpTraps 181 }
+
+
+avpTRAPQOMS00041 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Exception Occurred"
+	REFERENCE
+
+		"QOMS_00041"
+	::= { avpTraps 182 }
+
+
+avpTRAPQOMS00042 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"MPP logging attempt to system log failed"
+	REFERENCE
+
+		"QOMS_00042"
+	::= { avpTraps 204 }
+
+
+avpTRAPQSNMP02605 NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Test Alarm Notification"
+	REFERENCE
+
+		"QSNMP02605"
+	::= { avpTraps 205 }
+
+
+avpTRAPGENINFO NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Voice Portal system generic Informational alarm"
+	REFERENCE
+
+		"Informational alarm - Alarm Code contained in Alarm Text"
+	::= { avpTraps 900 }
+
+
+avpTRAPGENMINOR NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Voice Portal system generic Minor alarm"
+	REFERENCE
+
+		"Minor alarm - Alarm Code contained in Alarm Text"
+	::= { avpTraps 901 }
+
+
+avpTRAPGENMAJOR NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Voice Portal system generic Major alarm"
+	REFERENCE
+
+		"Major alarm - Alarm Code contained in Alarm Text"
+	::= { avpTraps 902 }
+
+
+avpTRAPGENCRITICAL NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Voice Portal system generic Critical alarm"
+	REFERENCE
+
+		"Critical alarm - Alarm Code contained in Alarm Text"
+	::= { avpTraps 903 }
+
+
+avpTRAPSTATGREEN NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Voice Portal system status is normal - no alarms"
+	REFERENCE
+
+		"STATUS GREEN"
+	::= { avpTraps 980 }
+
+avpTRAPSTATMINOR NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Voice Portal system status has Minor alarms"
+	REFERENCE
+
+		"STATUS MINOR"
+	::= { avpTraps 981 }
+
+avpTRAPSTATMAJOR NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Voice Portal system status has Major alarms"
+	REFERENCE
+
+		"STATUS MAJOR"
+	::= { avpTraps 982 }
+
+avpTRAPSTATCRIT NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Voice Portal system status has Critical alarms"
+	REFERENCE
+
+		"STATUS CRITICAL"
+	::= { avpTraps 983 }
+
+
+--
+-- Conformance information
+--
+
+avpConf OBJECT IDENTIFIER 	::= { avpVoicePortal 4 }
+
+avpGroups OBJECT IDENTIFIER 	::= { avpConf 1 }
+
+avpCompls OBJECT IDENTIFIER 	::= { avpConf 2 }
+
+
+avpCPUUtilization NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"CPU Utilization"
+	REFERENCE
+
+		"CPU Utilization"
+	::= { avpTraps 994 }
+
+
+avpMemoryFault NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Memory Fault"
+	REFERENCE
+
+		"Memory Fault"
+	::= { avpTraps 995 }
+
+
+avpDiskWarning NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Disk Warning"
+	REFERENCE
+
+		"Disk Warning"
+	::= { avpTraps 996 }
+
+
+avpDiskFull NOTIFICATION-TYPE
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmLoc,
+		avpAlarmSev,
+		avpAlarmText}
+	STATUS current
+	DESCRIPTION
+		"Disk Full"
+	REFERENCE
+
+		"Disk Full"
+	::= { avpTraps 997 }
+
+--
+-- Groups information
+--
+
+avpObjectGroup OBJECT-GROUP
+	OBJECTS {
+		avpAlarmTime,
+		avpAlarmText,
+		avpAlarmSev,
+		avpAlarmLoc }
+	STATUS current
+	DESCRIPTION
+		"Objects defined for use by Voice Portal."
+	::= { avpGroups 1 }
+
+avpMPPObjectGroup OBJECT-GROUP
+	OBJECTS {
+		avpMPPEntryName,
+		avpMPPEntryIPAddress,
+		avpMPPEntryVersion,
+		avpMPPEntryRequestedState,
+		avpMPPEntryConfiguredState,
+		avpMPPEntryCurrentState,
+		avpMPPEntryCPUUsagePercent,
+		avpMPPEntryDiskUsagePercent,
+		avpMPPEntryMemoryUsagePercent,
+		avpMPPEntryCPUUsage24HrAverage,
+		avpMPPEntryDiskUsage24HrAverage,
+		avpMPPEntryMemoryUsage24HrAverage,
+		avpMPPEntryUnacknowledgedAlarms,
+		avpMPPEntryAcknowledgedAlarms,
+		avpMPPEntryActiveCalls,
+		avpMPPEntryCallsToday }
+	STATUS current
+	DESCRIPTION
+		"A collection of objects related to MPP's"
+	::= { avpGroups 3 }
+
+avpApplicationObjectGroup OBJECT-GROUP
+	OBJECTS {
+		avpEntryAppName,
+		avpEntryAppDNIS,
+		avpEntryAppURL,
+		avpEntryAppCalledURI }
+	STATUS current
+	DESCRIPTION
+		"A collection of objects related to Voice Portal applications"
+	::= { avpGroups 4 }
+
+avpVPMSObjectGroup OBJECT-GROUP
+	OBJECTS {
+		avpVPMSHostname,
+		avpVPMSConfiguredMPPCount,
+		avpVPMSUnacknowledgedAlarms,
+		avpVPMSAcknowledgedAlarms,
+		avpVPMSSWVersion,
+		avpVPMSName }
+	STATUS current
+	DESCRIPTION
+		"A collection of objects related to VPMS"
+	::= { avpGroups 5 }
+
+avpNotificationGroup NOTIFICATION-GROUP
+	NOTIFICATIONS {
+		avpUnknown,
+		avpTRAPQLICE00001,
+		avpTRAPQLICE00002,
+		avpTRAPQLICE00003,
+		avpTRAPQLICE00004,
+		avpTRAPQLICE00005,
+		avpTRAPQCXI00001,
+		avpTRAPQCXI00002,
+		avpTRAPQCXI00003,
+		avpTRAPQCXI00004,
+		avpTRAPQCXI00005,
+		avpTRAPQCXI00006,
+		avpTRAPQCXI00007,
+		avpTRAPQCXI00008,
+		avpTRAPQCXI00009,
+		avpTRAPQCXI00010,
+		avpTRAPQCXI00011,
+		avpTRAPQCXI00012,
+		avpTRAPQCXI00013,
+		avpTRAPQCXI00016,
+		avpTRAPQCXI00017,
+		avpTRAPQADMN10001,
+		avpTRAPQADMN10002,
+		avpTRAPQADMN10003,
+		avpTRAPQADMN10004,
+		avpTRAPQADMN10005,
+		avpTRAPQSYSM00001,
+		avpTRAPQSYSM00002,
+		avpTRAPQSYSM00003,
+		avpTRAPQSYSM00004,
+		avpTRAPQSYSM00005,
+		avpTRAPQSYSM00006,
+		avpTRAPQSYSM00007,
+		avpTRAPQSYSM00008,
+		avpTRAPQSYSM00009,
+		avpTRAPQSYSM00010,
+		avpTRAPQSYSM00011,
+		avpTRAPQSYSM00013,
+		avpTRAPQSYSM00014,
+		avpTRAPQSYSM00015,
+		avpTRAPQSYSM00016,
+		avpTRAPQSYSM00017,
+		avpTRAPQSYSM00018,
+		avpTRAPQSYSM00019,
+		avpTRAPQSYSM00020,
+		avpTRAPQSYSM00022,
+		avpTRAPQSYSM00023,
+		avpTRAPQSYSM00024,
+		avpTRAPQSYSM00025,
+		avpTRAPQSYSM00026,
+		avpTRAPQSYSM00027,
+		avpTRAPQSYSM00028,
+		avpTRAPQSYSM00029,
+		avpTRAPQVB00001,
+		avpTRAPQVB00002,
+		avpTRAPQVB00003,
+		avpTRAPQVB00004,
+		avpTRAPQVB00005,
+		avpTRAPQSESM00001,
+		avpTRAPQSESM00002,
+		avpTRAPQSESM00003,
+		avpTRAPQSESM00004,
+		avpTRAPQSESM00005,
+		avpTRAPQSESM00006,
+		avpTRAPQSESM00007,
+		avpTRAPQSESM00008,
+		avpTRAPQSESM00009,
+		avpTRAPQSESM00010,
+		avpTRAPQSESM00011,
+		avpTRAPQSESM00012,
+		avpTRAPQSESM00013,
+		avpTRAPQSESM00014,
+		avpTRAPQSESM00015,
+		avpTRAPQSESM00016,
+		avpTRAPQSESM00017,
+		avpTRAPQSESM00018,
+		avpTRAPQSESM00019,
+		avpTRAPQSESM00020,
+		avpTRAPQSESM00021,
+		avpTRAPQSESM00022,
+		avpTRAPQSESM00023,
+		avpTRAPQSESM00024,
+		avpTRAPQSESM00025,
+		avpTRAPQSESM00026,
+		avpTRAPQSESM00027,
+		avpTRAPQSESM00028,
+		avpTRAPQSESM00029,
+		avpTRAPQSESM00030,
+		avpTRAPQSESM00031,
+		avpTRAPQSESM00032,
+		avpTRAPQSESM00033,
+		avpTRAPQSESM00034,
+		avpTRAPQSESM00035,
+		avpTRAPQSESM00036,
+		avpTRAPQSESM00037,
+		avpTRAPQSESM00038,
+		avpTRAPQSESM00039,
+		avpTRAPQSESM00040,
+		avpTRAPQSESM00041,
+		avpTRAPQSESM00042,
+		avpTRAPQSESM00043,
+		avpTRAPQSESM00044,
+		avpTRAPQSESM00045,
+		avpTRAPQSESM00046,
+		avpTRAPQSESM00047,
+		avpTRAPQSESM00048,
+		avpTRAPQSESM00049,
+		avpTRAPQSESM00051,
+		avpTRAPQSESM00052,
+		avpTRAPQSESM00053,
+		avpTRAPQSESM00054,
+		avpTRAPQSESM00056,
+		avpTRAPQSESM00057,
+		avpTRAPQSESM00064,
+		avpTRAPQSESM00065,
+		avpTRAPQSESM00066,
+		avpTRAPQTELE00001,
+		avpTRAPQTELE00002,
+		avpTRAPQTELE00003,
+		avpTRAPQTELE00004,
+		avpTRAPQTELE00005,
+		avpTRAPQTELE00006,
+		avpTRAPQTELE00007,
+		avpTRAPQTELE00008,
+		avpTRAPQTELE00009,
+		avpTRAPQTELE00024,
+		avpTRAPQTELE00031,
+		avpTRAPQMMS00001,
+		avpTRAPQMMS00002,
+		avpTRAPQMMS00003,
+		avpTRAPQADMN01005,
+		avpTRAPQCDH00001,
+		avpTRAPQCDH00008,
+		avpTRAPQOMS00034,
+		avpTRAPQOMS00035,
+		avpTRAPQOMS00036,
+		avpTRAPQOMS00037,
+		avpTRAPQOMS00039,
+		avpTRAPQOMS00040,
+		avpTRAPQOMS00045,
+		avpTRAPQOMS00047,
+		avpTRAPQOMS00049,
+		avpTRAPQOMS00050,
+		avpTRAPQOMS00051,
+		avpTRAPQOMS00052,
+		avpTRAPQOMS00053,
+		avpTRAPQOMS00054,
+		avpTRAPQOMS00055,
+		avpTRAPQOMS00056,
+		avpTRAPQOMS00057,
+		avpTRAPQOMS00058,
+		avpTRAPQOMS00059,
+		avpTRAPQOMS00060,
+		avpTRAPQOMS00061,
+		avpTRAPQOMS00062,
+		avpTRAPQOMS00063,
+		avpTRAPQOMS00064,
+		avpTRAPQOMS00065,
+		avpTRAPQOMS00066,
+		avpTRAPQOMS00067,
+		avpTRAPQOMS00068,
+		avpTRAPQOMS00077,
+		avpTRAPQOMS00078,
+		avpTRAPQOMS00079,
+		avpTRAPQOMS00080,
+		avpTRAPQOMS00081,
+		avpTRAPQOMS00082,
+		avpTRAPQOMS00083,
+		avpTRAPQOMS00084,
+		avpTRAPQOMS00085,
+		avpTRAPQOMS00088,
+		avpTRAPQOMS00090,
+		avpTRAPQOMS00095,
+		avpTRAPQOMS00096,
+		avpTRAPQOMS00097,
+		avpTRAPQOMS00098,
+		avpTRAPQOMS00099,
+		avpTRAPQOMS00100,
+		avpTRAPQOMS00122,
+		avpTRAPQOMS00123,
+		avpTRAPQOMS00124,
+		avpTRAPQOMS00125,
+		avpTRAPQOMS00126,
+		avpTRAPQOMS00128,
+		avpTRAPQOMS00129,
+		avpTRAPQOMS00140,
+		avpTRAPQOMS00160,
+		avpTRAPQASR00005,
+		avpTRAPQASR00007,
+		avpTRAPQASR00008,
+		avpTRAPQTTS00005,
+		avpTRAPQTTS00007,
+		avpTRAPQTTS00008,
+		avpTRAPQMRCP00005,
+		avpTRAPQMRCP00006,
+		avpTRAPQCXI00015,
+		avpTRAPQSYSM00012,
+		avpTRAPQSYSM00021,
+		avpTRAPQSESM00050,
+		avpTRAPQOMS00041,
+		avpTRAPQOMS00042,
+		avpTRAPQSNMP02605,
+		avpTRAPGENINFO,
+		avpTRAPGENMINOR,
+		avpTRAPGENMAJOR,
+		avpTRAPGENCRITICAL,
+		avpTRAPSTATGREEN,
+		avpTRAPSTATMINOR,
+		avpTRAPSTATMAJOR,
+		avpTRAPSTATCRIT,
+		avpCPUUtilization,
+		avpMemoryFault,
+		avpDiskWarning,
+		avpDiskFull }
+	STATUS current
+	DESCRIPTION
+		"Notificationss used by Voice Portal"
+	::= { avpGroups 2 }
+
+
+--
+-- Compliance information
+--
+
+avpCompliance MODULE-COMPLIANCE
+	STATUS current
+	DESCRIPTION
+		"The compliance statement for Voice Portal entities"
+
+	MODULE 
+	MANDATORY-GROUPS {
+			avpObjectGroup,
+			avpNotificationGroup }
+
+	::= { avpCompls 1 }
+
+END

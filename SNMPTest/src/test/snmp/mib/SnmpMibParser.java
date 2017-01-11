@@ -53,10 +53,11 @@ public class SnmpMibParser {
 		int parseStatusTemp = 0;
 		try {
 			int flag = 0;
+			String oid = "";
 			while ((getNextToken(st1).trim().length() > 0) || (st1.ttype == TT_EOL)) {
 				// while(st1.nextToken()!=StreamTokenizer.TT_EOF){
 				t1 = getTokenVal(st1);
-
+				oid += String.valueOf(parseStatus)+".";
 				switch (parseStatus) {
 				case 0:
 					System.out.println("tttttttttttss" + parseStatus + "  " + t1 + "ss");
@@ -339,6 +340,9 @@ public class SnmpMibParser {
 				}
 			}
 			System.out.println("****Result : \n" + currentRec.getCompleteString());
+			DwSnmpOidSupport oidSupport = new DwSnmpOidSupport();
+			
+//			System.out.println("****Result OID : \n"+ oidSupport.getNodeOid(currentRec));
 
 		} catch (Exception e) {
 			e.printStackTrace();
