@@ -1,4 +1,5 @@
 package test.snmp.trap;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Vector;
@@ -75,6 +76,7 @@ public class SnmpTrapReceiver implements CommandResponder {
 
 	public void run() {
 		try {
+
 			init();
 			snmp.addCommandResponder(this);
 		} catch (Exception ex) {
@@ -91,8 +93,9 @@ public class SnmpTrapReceiver implements CommandResponder {
 			Thread.sleep(60L * 5000L);
 		} catch (Exception e) {
 		}
+		// snmpTrapReceiver.shutdown();
+
 		// 종료처리
-		snmpTrapReceiver.shutdown();
 
 	}
 
@@ -111,16 +114,17 @@ public class SnmpTrapReceiver implements CommandResponder {
 				msg.append(", ");
 			}
 			System.out.println("***************************************************************************");
-			System.out.println("** OID : "+var.getOid());
-			System.out.println("** variable : "+var.getVariable());
-			System.out.println("** syntax : "+var.getSyntax());
-			System.out.println("** name : " + parser.getName(var.getOid().toString()));		
-			System.out.println("** Parent : " + parser.getParent(var.getOid().toString()));		
-			System.out.println("** Number : " + parser.getNumber(var.getOid().toString()));		
-			System.out.println("** Access : " + parser.getAccess(var.getOid().toString()));		
-			System.out.println("** Status : " + parser.getStatus(var.getOid().toString()));		
+			System.out.println("** OID : " + var.getOid());
+			System.out.println("** variable : " + var.getVariable());
+			System.out.println("** syntax : " + var.getSyntax());
+			System.out.println("** name : " + parser.getName(var.getOid().toString()));
+			System.out.println("** Parent : " + parser.getParent(var.getOid().toString()));
+			System.out.println("** Number : " + parser.getNumber(var.getOid().toString()));
+			System.out.println("** Access : " + parser.getAccess(var.getOid().toString()));
+			System.out.println("** Status : " + parser.getStatus(var.getOid().toString()));
 			System.out.println("** Description : " + parser.getDescription(var.getOid().toString()));
 			System.out.println("***************************************************************************");
+
 		}
 		System.out.println("msg = " + msg.toString());
 	}

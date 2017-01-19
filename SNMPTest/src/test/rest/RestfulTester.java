@@ -33,10 +33,11 @@ import com.google.gson.reflect.TypeToken;
 public class RestfulTester {
 	public static void main(String[] args) {
 		RestfulTester restTest = new RestfulTester();
-		restTest.doRestRequest("localhost", 7080, "/TongyangGW/wavmake?ment=test&option=1&ch=1");
+		//restTest.doRestRequest("localhost", 7080, "/TongyangGW/wavmake?ment=test&option=1&ch=1");
+		restTest.doRestRequest("localhost", 7080, "/TongyangGW/service/GetSvcConf");
 	}
-	
-	public void doSample(){
+
+	public void doSample() {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		String url = "api.github.com";
 		// String getBody = "/forecastrss?p=80020&u=f";
@@ -91,7 +92,7 @@ public class RestfulTester {
 				System.out.println(json);
 				HashMap value = gson.fromJson(json, HashMap.class);
 				System.out.println(value);
-				System.out.println("GET from Hashmap!! : "+value.get("current_user_url"));
+				System.out.println("GET from Hashmap!! : " + value.get("current_user_url"));
 			}
 
 		} catch (Exception e) {
@@ -103,71 +104,75 @@ public class RestfulTester {
 			httpclient.getConnectionManager().shutdown();
 		}
 	}
-	
-	public String doRestRequest(String urlString,int portNum, String body){
+
+	public String doRestRequest(String urlString, int portNum, String body) {
+		System.out.println("==Start doRestRequest");
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		//String url = "api.github.com";
+		// String url = "api.github.com";
 		String url = urlString;
 		// String getBody = "/forecastrss?p=80020&u=f";
-		//String getBody = "/";
+		// String getBody = "/";
 		String getBody = body;
-		//int port = 443; // https
+		// int port = 443; // https
 		int port = portNum;
 		// int port = 80; //http
 
 		try {
 			// specify the host, protocol, and port
 			HttpHost target = new HttpHost(url, port, "http");
-			// HttpHost target = new HttpHost(url);
+			// HttpHost target = new HttpHost("localhost:7080/TongyangGW/service/GetSvcConf");
 			// specify the get request
-			HttpGet getRequest = new HttpGet(getBody);
+			// HttpGet getRequest = new HttpGet(getBody);
+			//HttpPost postRequest = new HttpPost("http://localhost:7080/TongyangGW/service/GetSvcConf");
 			/**
 			 * Post요청
 			 */
-			// ArrayList<NameValuePair> postParams = new
-			// ArrayList<NameValuePair>();
-			// Map<String, String> paramMap = new HashMap<String, String>();
-			// Builder builder = RequestConfig.custom();
-			// builder.setConnectTimeout(4000);
-			// builder.setSocketTimeout(4000);
-			// builder.setStaleConnectionCheckEnabled(false);
-			// RequestConfig config = builder.build();
-			//
-			// for (Map.Entry<String, String> entry : paramMap.entrySet()) {
-			// postParams.add(new BasicNameValuePair(entry.getKey(),
-			// entry.getValue()));
-			// }
-			//
-			// HttpPost getRequest = new HttpPost(url);
-			// getRequest.setEntity(new UrlEncodedFormEntity(postParams));
-			// getRequest.setConfig(config);
+			ArrayList<NameValuePair> postParams = new ArrayList<NameValuePair>();
+			Map<String, String> paramMap = new HashMap<String, String>();
+			Builder builder = RequestConfig.custom();
+			builder.setConnectTimeout(4000);
+			builder.setSocketTimeout(4000);
+			builder.setStaleConnectionCheckEnabled(false);
+			RequestConfig config = builder.build();
+			/**
+			 * 파라미터
+			 */
+			//paramMap.put("channel", "111");
+
+			for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+				postParams.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+			}
+
+			HttpPost getRequest = new HttpPost("http://localhost:7080/TongyangGW/service/GetSvcConf");
+			getRequest.setEntity(new UrlEncodedFormEntity(postParams));
+			getRequest.setConfig(config);
 			/** **/
 
-			//System.out.println("executing request to " + target);
+			 //System.out.println("executing request to " + target);
 
 			HttpResponse httpResponse = httpclient.execute(target, getRequest);
 			HttpEntity entity = httpResponse.getEntity();
 
-//			System.out.println("----------------------------------------");
-//			System.out.println(httpResponse.getStatusLine());
+			 System.out.println("----------------------------------------");
+			 System.out.println(httpResponse.getStatusLine());
 			org.apache.http.Header[] headers = httpResponse.getAllHeaders();
 			for (int i = 0; i < headers.length; i++) {
-//				System.out.println(headers[i]);
+				 System.out.println(headers[i]);
 			}
-//			System.out.println("----------------------------------------");
+			// System.out.println("----------------------------------------");
 
 			if (entity != null) {
 				Gson gson = new Gson();
 				String json = EntityUtils.toString(entity);
 				System.out.println(json);
-				HashMap value = gson.fromJson(json, HashMap.class);
-				System.out.println(value);
-				System.out.println("GET from Hashmap!! : "+value.get("current_user_url"));
+				//HashMap value = gson.fromJson(json, HashMap.class);
+				//System.out.println(value);
+			//System.out.println("GET from Hashmap!! : " + value.get("current_user_url"));
 				return json;
 			}
-			
+
 		} catch (Exception e) {
-			//e.printStackTrace();
+			 e.printStackTrace();
 		} finally {
 			// When HttpClient instance is no longer needed,
 			// shut down the connection manager to ensure

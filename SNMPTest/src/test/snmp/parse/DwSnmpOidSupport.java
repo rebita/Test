@@ -255,7 +255,7 @@ public class DwSnmpOidSupport {
 				oidCopy = oidCopy.substring(0, oidCopy.lastIndexOf('.'));
 			}
 			if (objNumber == null || objNumber.equals("null")) 
-				return ("***");
+				return ("0");
 				
 		} catch (Exception e) {
 			System.out.println("Error in Resolving OID Number :\n " + e.toString());
